@@ -1,5 +1,6 @@
 const { WebClient } = require('@slack/web-api');
 
+const axios = require('axios')
 const express = require('express');
 
 module.exports = (botToken) => {
@@ -9,20 +10,30 @@ module.exports = (botToken) => {
 
   router.post('/', function(req, res, next) {
 
-    const { user_id: userId } = req.body;
+    const { user_id: userId, response_url: responseUrl } = req.body;
     if (!userId) {
-      res.send(400).send('missing user_id');
+      res.send('missing user_id');
       return;
     }
+    if (!responseUrl) {
+      res.send('missing response_url');
+      return;
+    }
+
+    res.send('one sec...');
 
     client.reactions.list({
       user: userId
     })
     .then((result) => {
-      res.status(200).send(result);
+      return axios.post(responseUrl, {
+        text: `got a response! ${JSON.stringify(result)}`
+      })
     })
-    .catch((err) => {
-      res.status(400).send(err.message);
+    .catch((error) => {
+      return axios.post(responseUrl, {
+        text: `got an error! ${JSON.stringify(error.message)}`
+      })
     })
   });
 
