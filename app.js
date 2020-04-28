@@ -6,11 +6,13 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const bodyParser = require('body-parser')
+const morganBody = require('morgan-body');
 
 const slackWebhookRoutes = require('./routes/slack-webhook')(botToken);
 
 const app = express();
 app.use(bodyParser.json())
+morganBody(app);
 
 app.use(logger('dev'));
 app.use(express.json());
