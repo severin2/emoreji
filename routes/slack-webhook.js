@@ -1,15 +1,14 @@
 const { WebClient } = require('@slack/web-api');
 
-const axios = require('axios')
+const axios = require('axios');
 const express = require('express');
 
 module.exports = (botToken) => {
   const router = express.Router();
 
-  const client = new WebClient(botToken)
+  const client = new WebClient(botToken);
 
-  router.post('/', function(req, res, next) {
-
+  router.post('/', async function (req, res, next) {
     const { user_id: userId, response_url: responseUrl } = req.body;
     if (!userId) {
       res.send('missing user_id');
@@ -22,19 +21,22 @@ module.exports = (botToken) => {
 
     res.send('one sec...');
 
-    client.reactions.list({
-      user: userId
-    })
-    .then((result) => {
-      return axios.post(responseUrl, {
-        text: `got a response! ${JSON.stringify(result)}`
-      })
-    })
-    .catch((error) => {
-      return axios.post(responseUrl, {
-        text: `got an error! ${JSON.stringify(error.message)}`
-      })
-    })
+    try {
+      const result = await client.reactions.list({
+        user: userId,
+        full: true,
+      });
+
+      axios.post(responseUrl, {
+        replace_original: 'true',
+        text: `got a response! ${JSON.stringify(result)}`,
+      });
+    } catch (error) {
+      axios.post(responseUrl, {
+        replace_original: 'true',
+        text: `got an error! ${JSON.stringify(error.message)}`,
+      });
+    }
   });
 
   return router;

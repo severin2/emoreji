@@ -1,17 +1,15 @@
-const { argv } = require('yargs');
-const { BOT_TOKEN: botToken } = require('yargs').argv;
-
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 const morganBody = require('morgan-body');
+const slackWebhookRoutes = require('./routes/slack-webhook');
 
-const slackWebhookRoutes = require('./routes/slack-webhook')(botToken);
+const { BOT_TOKEN: botToken } = process.env;
 
 const app = express();
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 morganBody(app);
 
 app.use(logger('dev'));
@@ -20,8 +18,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/webhook', slackWebhookRoutes);
-app.get('/', function(req, res, next) {
+app.use('/webhook', slackWebhookRoutes(botToken));
+app.get('/', function (req, res, next) {
   res.status(200).send('holla at your boy (/¯–‿･)/¯');
 });
 
