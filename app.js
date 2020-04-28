@@ -3,6 +3,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var slackWebhookRoutes = require('./routes/slack-webhook');
 var emorejiRoutes = require('./routes/emoreji');
 
 var app = express();
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/webhook', slackWebhookRoutes);
 app.use('/', emorejiRoutes);
 
 module.exports = app;
